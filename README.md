@@ -4,7 +4,7 @@ This is a set of command line utilties that you can use to generate a SubRip .sr
 ## Prerequistes
 In order to be able to use these utilities, make sure you have [ffmpeg](http://www.ffmpeg.org) installed on your system (including all necessary encoding libraries such as libmp3lame or libx264).
 
-The `subtitler` Generator uses the [fluent-ffmpeg](https://github.com/fluent-ffmpeg/node-fluent-ffmpeg) package and this package requires that you have a version greater than 0.9 of ffmpeg be installed. The fluent-ffmpeg package will call `ffmpeg` and `ffprobe` so you need to have these in your `PATH` or set in the `FFMPEG_PATH` environment variable and the `FFPROBE_PATH` environment variable. The `subtitler` utility will be creating .mp3 files so you must have the `libmp3lame` code installed on your system.
+The `subtitler` generator uses the [fluent-ffmpeg](https://github.com/fluent-ffmpeg/node-fluent-ffmpeg) package and this package requires that you have a version greater than 0.9 of ffmpeg be installed. The fluent-ffmpeg package will call `ffmpeg` and `ffprobe` so you need to have these in your `PATH` or set in the `FFMPEG_PATH` environment variable and the `FFPROBE_PATH` environment variable. The `subtitler` utility will be creating .mp3 files so you must have the `libmp3lame` code installed on your system.
 
 You must also establish an [IBM Bluemix](https://console.bluemix.net/registration/?Target=https%3A//idaas.iam.ibm.com/idaas/oidc/endpoint/default/authorize%3Fresponse_type%3Dcode%26client_id%3DtkM810HLsH%26state%3D001503942815445TM22MNlNu%26redirect_uri%3Dhttps%253A%252F%252Flogin.ng.bluemix.net%252Foidcclient%252Fredirect%252FtkM810HLsH%26scope%3Dopenid) account and create service instances for [Watson Speech to Text](https://console.bluemix.net/catalog/services/speech-to-text?env_id=ibm:yp:us-south) and [Globalization Pipeline](https://console.bluemix.net/catalog/services/globalization-pipeline?env_id=ibm:yp:us-south).
 
@@ -55,7 +55,7 @@ This is the general syntax for using `subtitler`
 node subtitler filename source-language | customization-id
 ```
 
-Currently only the following language codes are supported: en, en-GB, ar, es, fr ja, pt-BR, and zh-Hans. 
+Currently only the following language codes are supported: en, en-GB, ar, es, fr, ja, pt-BR, and zh-Hans. 
 
 For example, if you wanted to create English subtitles for your video file using the default broadband speech model you would use the following command.
 
