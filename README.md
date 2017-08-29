@@ -1,10 +1,12 @@
-Subtitle Generator and Translator for Videos Using IBM Watson Speech to Text and Globalization Pipeline Services
+Subtitle Generator and Translator for Videos Using IBM Watson Speech to Text and Globalization Pipeline Services in Node.js
 ============================================
-This is a set of command line utilties that you can use to generate a SubRip .srt file from an .mp4 video by using the [IBM Watson Speech to Text](https://www.ibm.com/watson/services/speech-to-text/) service on [IBM Bluemix](https://www.ibm.com/cloud-computing/bluemix/what-is-bluemix). Once you have generated the SubRip file you can then translate it into multiple languages by using the [IBM Globalization Pipeline](https://console.bluemix.net/docs/services/GlobalizationPipeline/index.html) service on IBM Bluemix. 
+This is a set of command line utilties written in node.js that you can use to generate a [SubRip](https://en.wikipedia.org/wiki/SubRip) .srt file from an .mp4 video by using the [IBM Watson Speech to Text](https://www.ibm.com/watson/services/speech-to-text/) service on [IBM Bluemix](https://www.ibm.com/cloud-computing/bluemix/what-is-bluemix). Once you have generated the SubRip file you can then translate it into multiple languages by using the [IBM Globalization Pipeline](https://console.bluemix.net/docs/services/GlobalizationPipeline/index.html) service on IBM Bluemix. 
 ## Prerequistes
+You need to have Node.js installed on your machine. If you don't have Node.js, then you can download it from [nodejs.org](https://nodejs.org/en/).
+
 In order to be able to use these utilities, make sure you have [ffmpeg](http://www.ffmpeg.org) installed on your system (including all necessary encoding libraries such as libmp3lame or libx264).
 
-The `subtitler` generator uses the [fluent-ffmpeg](https://github.com/fluent-ffmpeg/node-fluent-ffmpeg) package and this package requires that you have a version greater than 0.9 of ffmpeg be installed. The fluent-ffmpeg package will call `ffmpeg` and `ffprobe` so you need to have these in your `PATH` or set in the `FFMPEG_PATH` environment variable and the `FFPROBE_PATH` environment variable. The `subtitler` utility will be creating .mp3 files so you must have the `libmp3lame` code installed on your system.
+The `subtitler` generator uses the [fluent-ffmpeg](https://github.com/fluent-ffmpeg/node-fluent-ffmpeg) package and this package requires that you have a version greater than 0.9 of ffmpeg be installed. The fluent-ffmpeg package will call `ffmpeg` and `ffprobe` so you need to have these in your `PATH` or set in the `FFMPEG_PATH` environment variable and the `FFPROBE_PATH` environment variable. The `subtitler` utility will be creating .mp3 files so you must have the `libmp3lame` codec installed on your system.
 
 You must also establish an [IBM Bluemix](https://console.bluemix.net/registration/?Target=https%3A//idaas.iam.ibm.com/idaas/oidc/endpoint/default/authorize%3Fresponse_type%3Dcode%26client_id%3DtkM810HLsH%26state%3D001503942815445TM22MNlNu%26redirect_uri%3Dhttps%253A%252F%252Flogin.ng.bluemix.net%252Foidcclient%252Fredirect%252FtkM810HLsH%26scope%3Dopenid) account and create service instances for [Watson Speech to Text](https://console.bluemix.net/catalog/services/speech-to-text?env_id=ibm:yp:us-south) and [Globalization Pipeline](https://console.bluemix.net/catalog/services/globalization-pipeline?env_id=ibm:yp:us-south).
 
@@ -12,17 +14,17 @@ You must also establish an [IBM Bluemix](https://console.bluemix.net/registratio
 Download or clone this repository and then install all packages.
 
 ```sh
-git clone https://github.com/steveatkin/Subtitler
+$ git clone https://github.com/steveatkin/Subtitler
 ```
 
 ```sh
-npm install
+$ npm install
 ```
 ## Setting The Credential Files for Services
 
 * Create a `speech-credentials.json` file with the credentials
 from your instance of Watson Speech to Text:
-```
+```json
 
     {
         "credentials": {
@@ -34,8 +36,8 @@ from your instance of Watson Speech to Text:
 ```
 
 * Create a `g11n-credentials.json` file with the credentials
-for a user of your instance of Globalization Pipeline. Be certain to create a user in Globalization Pipeline that has read write capabilities:
-```
+for a user of your instance of Globalization Pipeline. Be certain to create a user in the Globalization Pipeline service dashboard that has `Administrator` privileges for all resource bundles:
+```json
     {
         "credentials": {
             "url": "……",
@@ -70,7 +72,7 @@ node subtitler myVideo.mp4 xxxxxx-xxxxx
 Once `subtitler` finishes it will create a file named the same as the video filename except with the .srt extension. Additionally, an .mp3 file will be created that contains the extracted audio from the video file. It will be named the same as the video filename except that it will end in .mp3.
 
 ### Translating Subtitles
-When calling `translator` you need to specify both the BCP source language and the target language for the subtitle files. To use the `translator` you must first upload the content for translation. Once translation is completed you can then download it. You can check the status of your translation in the Globalization Pipeline service dashboard. By default `translator` will create a resource bundle with the same name as the video filename in the Globalization Pipeline service.
+When calling `translator` you need to specify both the BCP source language and the BCP target language for the subtitle files. To obtain translated subtitles use must first upload the source subtitles using the `translator` utility with the upload argument. Once translation is completed you can then download your translated subtitles by calling the `translator` utility with the download argument. You can check the status of your translation in the Globalization Pipeline service dashboard. By default `translator` will create a resource bundle with the same name as the video filename in the Globalization Pipeline service.
 
 Once `translator` has finished downloading your content it will create a file that has the same name as the source file with the target language code appended to the filename.
 
