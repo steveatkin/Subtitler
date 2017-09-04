@@ -59,7 +59,7 @@ node subtitler filename source-language | customization-id
 
 Currently only the following language codes are supported: en, en-GB, ar, es, fr, ja, pt-BR, and zh-Hans. 
 
-For example, if you wanted to create English subtitles for your video file using the default broadband speech model you would use the following command.
+For example, if you wanted to create English subtitles for your video file using the default broadband speech model you would use the following command:
 
 ```
 node subtitler myVideo.mp4 en
@@ -69,7 +69,23 @@ or with a customization id
 node subtitler myVideo.mp4 xxxxxx-xxxxx
 ```
 
-Once `subtitler` finishes it will create a file named the same as the video filename except with the .srt extension. Additionally, an .mp3 file will be created that contains the extracted audio from the video file. It will be named the same as the video filename except that it will end in .mp3.
+Once `subtitler` finishes it will create a file named the same as the video filename except with the `.srt` extension. A raw speech events file will also be created and has the same name as the video file except it will append on `_events.json`. Additionally, an .mp3 file will be created that contains the extracted audio from the video file. It will be named the same as the video filename except that it will end in `.mp3`.
+
+### Segmenting Subtitles
+Quite often when speech to text services are used to extract subtitles from audio and video, the generated subtitles may be incomplete English sentences. This frequently presents challenges for translating subtitles into other languages. 
+
+You can use the `segmenter` utility to help transform the sentence fragments into complete sentences. This utlity calls the http://bark.phon.ioc.ee/punctuator service to cleanup the raw segements. Currently this can only be done for English segments.
+
+When `segmenter` is run it will generate a SubRip file that has the same name as the events file except it will end in `.srt`.
+
+This is the general syntax for using `segmenter`
+```
+node segmenter filename source-language
+```
+For example, if you wanted to segment raw English speech events into segments you would use the following command:
+```
+node segmenter myVideo_events.json en
+```
 
 ### Translating Subtitles
 When calling `translator` you need to specify both the BCP source language and the BCP target language for the subtitle files. To obtain translated subtitles use must first upload the source subtitles using the `translator` utility with the upload argument. Once translation is completed you can then download your translated subtitles by calling the `translator` utility with the download argument. You can check the status of your translation in the Globalization Pipeline service dashboard. By default `translator` will create a resource bundle with the same name as the video filename in the Globalization Pipeline service.

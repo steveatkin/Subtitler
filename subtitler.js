@@ -30,7 +30,6 @@ var moment = require('moment');
 require("moment-duration-format");
 var SpeechToTextV1 = require('watson-developer-cloud/speech-to-text/v1');
 
-
 function processVideo(callback) {
 
     var argv = require('minimist')(process.argv.slice(2));
@@ -190,8 +189,10 @@ function getSubtitles(creds, filename, source, callback) {
 
 }
 
+
 function formatSubtitles(resultsArray) {
     var srtJSON = [];
+    var speechEvents = [];
 
     for (var i = 0; i < resultsArray.length; ++i) {
         var result = resultsArray[i].results[0];
@@ -203,12 +204,24 @@ function formatSubtitles(resultsArray) {
 
         if (confidence > 0.0) {
 
+            // This is used to record the raw speech events 
+            var event = {
+                'id': 0,
+                'text': '',
+                'words': []
+            };
+
+            // This used for the subtitles
             var subtitle = {
                 'id': '0',
                 'startTime': '',
                 'endTime': '',
                 'text': ''
             };
+
+            event.id = String(i + 1);
+            event.text = textItem;
+            event.words = timeStamps;
 
             subtitle.id = String(i + 1);
             subtitle.text = textItem;
@@ -224,10 +237,14 @@ function formatSubtitles(resultsArray) {
             });
 
             srtJSON.push(subtitle);
+            speechEvents.push(event);
         }
 
     }
-    return srtJSON;
+    return ({
+        'subtitles': srtJSON,
+        'events': speechEvents
+    });
 }
 
 clear();
@@ -254,11 +271,15 @@ if (files.fileExists('./speech-credentials.json')) {
                 } else {
                     console.log('Generating subtitles file');
                     var parser = require('subtitles-parser');
-                    var srtJSON = formatSubtitles(response);
+                    var speechData = formatSubtitles(response);
                     // Take the JSON objects and write them in SRT format
-                    var srtSubs = parser.toSrt(srtJSON);
+                    var srtSubs = parser.toSrt(speechData.subtitles);
                     files.write(files.name(filename) + '.srt', srtSubs);
                     console.log('Finished generating subtitles file: ' + files.name(filename) + '.srt');
+
+                    // Write out all the raw speech events
+                    files.write(files.name(filename) + '_events.json', JSON.stringify(speechData.events, null, 2));
+                    console.log('Finished generating speech events file: ' + files.name(filename) + '_Events.json');
                 }
             });
         }
