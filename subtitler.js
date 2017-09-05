@@ -189,6 +189,12 @@ function getSubtitles(creds, filename, source, callback) {
 
 }
 
+function countWords(s) {
+    s = s.replace(/\n/g, ' '); // newlines to space
+    s = s.replace(/(^\s*)|(\s*$)/gi, ''); // remove spaces from start + end
+    s = s.replace(/[ ]{2,}/gi, ' '); // 2 or more spaces to 1
+    return s.split(' ').length;
+}
 
 function formatSubtitles(resultsArray) {
     var srtJSON = [];
@@ -221,7 +227,32 @@ function formatSubtitles(resultsArray) {
 
             event.id = String(i + 1);
             event.text = textItem;
-            event.words = timeStamps;
+
+            /* 
+            We need to do a special check to see if there are multiple words in any of
+            the timeStamps. We break them up into multiple words. 
+            */
+
+            var correctedTimeStamps = [];
+
+            for(j = 0; j < timeStamps.length; ++j) {
+        
+                if(countWords(timeStamps[j][0]) == 1) {
+                    correctedTimeStamps.push(timeStamps[j]);
+                }
+                else {
+                    // grab each word and create a separate entry
+                    var start = timeStamps[j][1];
+                    var end = timeStamps[j][2];
+
+                    var words = timeStamps[j][0].split(' ');
+                    for(k = 0; k < words.length; ++k) {
+                        correctedTimeStamps.push([words[k], start, end]);
+                    }
+                }
+            }
+
+            event.words = correctedTimeStamps;
 
             subtitle.id = String(i + 1);
             subtitle.text = textItem;
