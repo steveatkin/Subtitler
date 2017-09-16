@@ -32,6 +32,7 @@
     "subtitles-parser": "^0.0.2",
     "watson-developer-cloud": "^2.38.0",
     "sentence-tokenizer": "^0.0.8",
-    "request": "^2.81.0"
+    "request": "^2.81.0",
+    "trim": "^0.0.1"
   }
 }

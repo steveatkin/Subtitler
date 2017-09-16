@@ -49,24 +49,24 @@ for a user of your instance of Globalization Pipeline. Be certain to create a us
 ```
 ## Using the Utilities
 ### Generating Subtitles
-When calling `subtitler` you can specify either the BCP language code that corresponds to the language being used in the video or you can use a customized speech engine by specifying the customization id. In all cases `subtitler` allways uses the broadband speech engines in order to obtain the best results.
+When calling `subtitler` you can specify either the BCP language code that corresponds to the language being used in the video or you can use a customized speech engine by specifying the customization id. In all cases `subtitler` allways uses the broadband speech engines in order to obtain the best results. You can also indicate whether or not sentence casing should be performed. By default `subtitler` will capitalize the first letter in the first word of a subtitle and add a period to the end of the subtitle. 
 
 This is the general syntax for using `subtitler`
 
 ```
-node subtitler filename source-language | customization-id
+node subtitler filename source-language | customization-id sentence-casing[yes|no]
 ```
 
 Currently only the following language codes are supported: en, en-GB, ar, es, fr, ja, pt-BR, and zh-Hans. 
 
-For example, if you wanted to create English subtitles for your video file using the default broadband speech model you would use the following command:
+For example, if you wanted to create English subtitles for your video file using the default broadband speech model with sentence casing you would use the following command:
 
 ```
-node subtitler myVideo.mp4 en
+node subtitler myVideo.mp4 en yes
 ```
 or with a customization id
 ```
-node subtitler myVideo.mp4 xxxxxx-xxxxx
+node subtitler myVideo.mp4 xxxxxx-xxxxx yes
 ```
 
 Once `subtitler` finishes it will create a file named the same as the video filename except with the `.srt` extension. A raw speech events file will also be created and has the same name as the video file except it will append on `_events.json`. Additionally, an .mp3 file will be created that contains the extracted audio from the video file. It will be named the same as the video filename except that it will end in `.mp3`.

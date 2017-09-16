@@ -29,6 +29,7 @@ var ffmpeg = require('fluent-ffmpeg');
 var moment = require('moment');
 require("moment-duration-format");
 var SpeechToTextV1 = require('watson-developer-cloud/speech-to-text/v1');
+var trim = require('trim');
 
 function processVideo(callback) {
 
@@ -56,7 +57,21 @@ function processVideo(callback) {
                 if (value.length) {
                     return true;
                 } else {
-                    return 'Enter the BCP source language code or customization id';
+                    return 'Please enter the BCP source language code or customization id';
+                }
+            },
+        },
+        {
+            name: 'casing',
+            type: 'list',
+            message: 'Indicate whether subtitles should be sentence cased:',
+            choices: ['yes', "no"],
+            default: argv._[2] || 'yes',
+            validate: function (value) {
+                if (value.length) {
+                    return true;
+                } else {
+                    return 'Please indicate whether the captions should be sentence cased';
                 }
             },
         }
@@ -73,7 +88,7 @@ function processVideo(callback) {
                 return callback(err);
             } else {
                 status.stop();
-                return callback(err, filename, answers.source);
+                return callback(err, filename, answers.source, answers.casing);
             }
         });
 
@@ -145,7 +160,7 @@ function getSubtitles(creds, filename, source, callback) {
         continuous: true,
         interim_results: true,
         max_alternatives: 1,
-        smart_formatting: true
+        smart_formatting: false
     };
 
     if (model != '') {
@@ -196,7 +211,11 @@ function countWords(s) {
     return s.split(' ').length;
 }
 
-function formatSubtitles(resultsArray) {
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function formatSubtitles(resultsArray, casing) {
     var srtJSON = [];
     var speechEvents = [];
 
@@ -235,18 +254,17 @@ function formatSubtitles(resultsArray) {
 
             var correctedTimeStamps = [];
 
-            for(j = 0; j < timeStamps.length; ++j) {
-        
-                if(countWords(timeStamps[j][0]) == 1) {
+            for (j = 0; j < timeStamps.length; ++j) {
+
+                if (countWords(timeStamps[j][0]) == 1) {
                     correctedTimeStamps.push(timeStamps[j]);
-                }
-                else {
+                } else {
                     // grab each word and create a separate entry
                     var start = timeStamps[j][1];
                     var end = timeStamps[j][2];
 
                     var words = timeStamps[j][0].split(' ');
-                    for(k = 0; k < words.length; ++k) {
+                    for (k = 0; k < words.length; ++k) {
                         correctedTimeStamps.push([words[k], start, end]);
                     }
                 }
@@ -255,7 +273,12 @@ function formatSubtitles(resultsArray) {
             event.words = correctedTimeStamps;
 
             subtitle.id = String(i + 1);
-            subtitle.text = textItem;
+
+            if (casing === 'yes') {
+                subtitle.text = capitalizeFirstLetter(trim(textItem)) + '.';
+            } else {
+                subtitle.text = textItem;
+            }
             // The timestamps entry is an array of 3 items ['word', 'start time', 'end time']
 
             // Get the start time for when the first word is spoken in the segment
@@ -291,7 +314,7 @@ if (files.fileExists('./speech-credentials.json')) {
 
     var creds = optional('./speech-credentials.json');
 
-    processVideo(function (err, filename, source) {
+    processVideo(function (err, filename, source, casing) {
         if (err) {
             console.log("Failed to generate audio file from video");
         } else {
@@ -302,7 +325,7 @@ if (files.fileExists('./speech-credentials.json')) {
                 } else {
                     console.log('Generating subtitles file');
                     var parser = require('subtitles-parser');
-                    var speechData = formatSubtitles(response);
+                    var speechData = formatSubtitles(response, casing);
                     // Take the JSON objects and write them in SRT format
                     var srtSubs = parser.toSrt(speechData.subtitles);
                     files.write(files.name(filename) + '.srt', srtSubs);
