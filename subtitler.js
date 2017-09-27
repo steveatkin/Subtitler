@@ -145,7 +145,7 @@ function getSubtitles(creds, filename, source, callback) {
     } else if (source === 'fr') {
         model = 'fr-FR_BroadbandModel';
     } else if (source === 'ja') {
-        model = 'js-JP_BroadbandModel';
+        model = 'ja-JP_BroadbandModel';
     } else if (source === 'pt-BR') {
         model = 'pt-BR_BroadbandModel';
     } else if (source === 'zh-Hans') {
