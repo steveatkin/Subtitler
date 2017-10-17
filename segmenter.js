@@ -58,6 +58,22 @@ function processSubtitles(callback) {
                 return 'Enter the BCP source language code or customization id';
             }
         },
+    },
+    {
+        name: 'service',
+        type: 'input',
+        message: 'Enter the id of segmentation service: \n'
+        		+ '0: http://bark.phon.ioc.ee/punctuator \n'
+        		+ '1: https://punctuationservice.mybluemix.net \n',
+        default: argv._[2] || '0',
+        validate: function (value) {
+        	value = value + '';
+            if (value.length) {
+                return true;
+            } else {
+                return 'Enter the id of segmentation service';
+            }
+        },
     }];
 
     inquirer.prompt(questions).then(function (answers) {
@@ -73,7 +89,13 @@ function processSubtitles(callback) {
             console.log("Only English segmentation is currently supported");
             return callback({'message': 'Unsuported language'});
         }
-
+        
+        if(answers.service != 0 && answers.service != 1) {
+            status.stop();
+            console.log("Need input proper segmentation service id");
+            return callback({'message': 'Unsuported segmentation service id'});
+        }
+        
         // Read all the raw speech events
         try {
             speechEvents = JSON.parse(files.read(answers.filename));
@@ -83,7 +105,7 @@ function processSubtitles(callback) {
             return callback(err);
         }
 
-        generateSegments(speechEvents, function (err, data) {
+        generateSegments(speechEvents, answers.service, function (err, data) {
             if (err) {
                 console.log(err.message);
                 status.stop();
@@ -168,10 +190,11 @@ function formatSubtitles(segments, wordTimes) {
 }
 
 
-function generateSegments(speechEvents, callback) {
+function generateSegments(speechEvents, serviceId, callback) {
     var srt = '';
     var subtitles = '';
-    var transcript = ''
+    var transcript = '';
+    var seg_services = ['http://bark.phon.ioc.ee/punctuator', 'https://punctuationservice.mybluemix.net/api/punctext']; 	
 
     for (var i = 0; i < speechEvents.length; ++i) {
         if (transcript === '') {
@@ -182,7 +205,7 @@ function generateSegments(speechEvents, callback) {
     }
 
     // Call the web service to create segments from the raw text strings 
-    request.post('http://bark.phon.ioc.ee/punctuator', {
+    request.post(seg_services[serviceId], {
         form: {
             text: transcript
         }
